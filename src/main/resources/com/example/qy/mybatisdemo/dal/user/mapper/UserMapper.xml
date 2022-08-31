@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.qy.mybatisdemo.dal.user.mapper.UserMapper">
+  <resultMap id="BaseResultMap" type="com.example.qy.mybatisdemo.dal.user.entity.User">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="age" jdbcType="INTEGER" property="age" />
+    <result column="time" jdbcType="DATE" property="time" />
+    <result column="is_default" jdbcType="TINYINT" property="isDefault" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    id, `name`, age, `time`, is_default
+  </sql>
+  <delete id="deleteByFilter" parameterType="com.example.qy.mybatisdemo.dal.user.entity.UserCriteria">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    delete from user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <select id="queryCount" resultType="java.lang.Integer">
+    select count(id) from user where name  = 'xxx'
+  </select>
+
+  <insert id="batchInsert" keyProperty="id" parameterType="java.util.List" useGeneratedKeys="true">
+    insert into user
+    (
+      name,
+      age,
+      time,
+      is_default
+    )
+    values
+    <foreach collection="list" index="index" item="item" separator=",">
+      (
+        #{item.name},
+        #{item.age},
+        #{item.time},
+        #{item.isDefault}
+      )
+    </foreach>
+    on duplicate key update
+    age = VALUES(age),
+    `time` = VALUES(`time`)
+  </insert>
+
+
+  <select id="selectIdsByCode" resultType="java.lang.Integer">
+    select id from user
+    where is_default = 2
+  </select>
+
+  <update id="initSetting">
+    insert into user(
+      name,
+      age,
+      time,
+      is_default
+    )
+    values
+    <foreach collection="list" item="it" separator=",">
+      (
+      #{it.name}, #{it.age}, #{it.time}, #{it.isDefault}
+      )
+    </foreach>
+  </update>
+
+  <select id="queryIdAndName" resultType="java.util.Map">
+    select id, name from user
+    where id = #{id}
+  </select>
+
+  <update id="updateUser">
+    update `user`
+    set `name` = 'lwl0128', `time` = now()
+  </update>
+
+  <update id="batchUpdate">
+    <foreach close="" collection="list" index="index" item="it" open="" separator=";">
+      update `user`
+      <set>
+        age = age + 1,
+        `time` = #{it.time}
+      </set>
+      <where>
+        id = #{it.id}
+      </where>
+    </foreach>
+  </update>
+
+  <select id="queryByName" resultType="com.example.qy.mybatisdemo.dal.user.entity.User">
+    select * from user where `name` like concat('%',#{name},'%')
+  </select>
+
+  <select id="queryByIds" resultType="com.example.qy.mybatisdemo.dal.user.entity.User">
+    select * from user where
+    <choose>
+      <when test="ids != null and ids.size() &gt; 0">
+         id in
+        <foreach close=")" collection="ids" item="it" open="(" separator=",">
+          #{it}
+        </foreach>
+      </when>
+      <otherwise>
+         false
+      </otherwise>
+    </choose>
+  </select>
+
+  <select id="queryByParam" resultType="com.example.qy.mybatisdemo.dal.user.entity.User">
+    select * from user
+    where is_default = #{isDefault}
+    <choose>
+      <when test="list != null and list.size() &gt; 0">
+        and (`name`,age) in
+        <foreach close=")" collection="list" item="it" open="(" separator=",">
+          (#{it.name},#{it.age})
+        </foreach>
+      </when>
+      <otherwise>
+        and false
+      </otherwise>
+    </choose>
+  </select>
+
+  <select id="queryListByParam" parameterType="com.example.qy.mybatisdemo.dal.dto.UserQueryParam" resultType="com.example.qy.mybatisdemo.dal.user.entity.User">
+    select * from user
+    where
+    <choose>
+      <when test="dtoList != null and dtoList.size() &gt; 0">
+         (`name`,age) in
+        <foreach close=")" collection="dtoList" item="it" open="(" separator=",">
+          (#{it.name},#{it.age})
+        </foreach>
+      </when>
+      <otherwise>
+         false
+      </otherwise>
+    </choose>
+  </select>
+
+  <update id="delByCondition">
+    update user set is_default = #{isDefault} + 1
+    where is_default = #{isDefault}
+    <choose>
+      <when test="list != null and list.size() &gt; 0">
+         and (`name`,age) in
+        <foreach close=")" collection="list" item="it" open="(" separator=",">
+          (#{it.name},#{it.age})
+        </foreach>
+      </when>
+      <otherwise>
+         and false
+      </otherwise>
+    </choose>
+  </update>
+
+  <update id="updateTest">
+    update user set is_default = 0
+    where id = 1
+    and 'name' != #{name}
+  </update>
+
+  <select id="queryTest" resultType="java.lang.String">
+    select name from user where `name` != #{name} or id is not null limit 1
+  </select>
+</mapper>
